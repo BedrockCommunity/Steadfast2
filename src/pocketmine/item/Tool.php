@@ -24,6 +24,9 @@ namespace pocketmine\item;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\Server;
+use pocketmine\nbt\tag\Compound;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\item\enchantment\Enchantment;
 
 abstract class Tool extends Item {
 
@@ -41,6 +44,7 @@ abstract class Tool extends Item {
 
 	public function __construct($id, $meta = 0, $count = 1, $name = "Unknown") {
 		parent::__construct($id, $meta, $count, $name);
+		$this->checkDamage();
 	}
 
 	public function getMaxStackSize() {
@@ -55,19 +59,33 @@ abstract class Tool extends Item {
 	 * @return bool
 	 */
 	public function useOn($object) {
+		if ($object instanceof Entity && !$object->isBreakTool()) {			
+			return true;
+		}
 		static $isUnbreakable = null;
 		if (is_null($isUnbreakable)) {
 			$isUnbreakable = Server::getInstance()->getConfigBoolean("unbreakable-tools", false);
 		}
 		if (!$isUnbreakable) {
+			$ench = $this->getEnchantment(Enchantment::TYPE_UNBREAKING);
+			if (!is_null($ench)) {
+				$enchLevel = $ench->getLevel();
+				$chance = 100 / ($enchLevel + 1);
+				if (mt_rand(1, 100) > $chance) {
+					return true;
+				}
+			}
 			if ($this->isHoe()) {
 				if (($object instanceof Block) and ( $object->getId() === self::GRASS or $object->getId() === self::DIRT)) {
 					$this->meta++;
+					$this->checkDamage();
 				}
 			} elseif (($object instanceof Entity) and ! $this->isSword()) {
 				$this->meta += 2;
+				$this->checkDamage();
 			} else {
 				$this->meta++;
+				$this->checkDamage();
 			}
 		}
 		return true;
@@ -132,6 +150,42 @@ abstract class Tool extends Item {
 
 	public function isTool() {
 		return ($this->id === self::FLINT_STEEL or $this->id === self::SHEARS or $this->id === self::BOW or $this->isPickaxe() !== false or $this->isAxe() !== false or $this->isShovel() !== false or $this->isSword() !== false);
+	}
+	
+	public function setDamage($meta) {
+		parent::setDamage($meta);
+		$this->checkDamage();
+	}
+
+	public function checkDamage() {
+		if ($this->meta == 0) {
+			if ($this->hasCompound()) {
+				$tag = $this->getNamedTag();
+				if (isset($tag->Damage)) {
+					unset($tag->Damage);
+					parent::setCompound($tag);
+				}
+			}
+		} else {
+			if (!$this->hasCompound()) {
+				$tag = new Compound("", []);
+			} else {
+				$tag = $this->getNamedTag();
+			}
+			$tag->Damage = new IntTag("Damage", $this->meta);
+			parent::setCompound($tag);
+		}
+	}
+	
+	public function setCompound($tags) {
+		if($tags instanceof Compound){
+			if (isset($tags['Damage'])) {
+				$this->meta = $tags['Damage'];
+			}
+		}
+		parent::setCompound($tags);
+		$this->checkDamage();
+		return $this;
 	}
 
 }

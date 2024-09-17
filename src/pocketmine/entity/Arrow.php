@@ -19,46 +19,44 @@
 */
 namespace pocketmine\entity;
 
+use pocketmine\block\WoodenButton;
+use pocketmine\item\Item;
 use pocketmine\level\format\FullChunk;
+use pocketmine\level\Level;
 use pocketmine\level\particle\CriticalParticle;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\Compound;
 use pocketmine\network\protocol\AddEntityPacket;
 use pocketmine\Player;
-use pocketmine\level\Level;
-use pocketmine\math\Vector3;
 use pocketmine\block\Lava;
+use function var_dump;
 
 class Arrow extends Projectile {
 
 	const NETWORK_ID = 80;
-	
+
 	public $width = 0.5;
 	public $length = 0.5;
 	public $height = 0.5;
 	protected $gravity = 0.03;
 	protected $drag = 0.01;
 	protected $damage = 2;
-	public $isCritical;
-	
+
 	public function __construct(FullChunk $chunk, Compound $nbt, Entity $shootingEntity = null, $critical = false) {
-		$this->isCritical = (bool) $critical;
 		parent::__construct($chunk, $nbt, $shootingEntity);
+		$this->setCritical($critical);
 	}
-	
+
 	public function onUpdate($currentTick) {
 		if ($this->closed) {
 			return false;
 		}
 		$hasUpdate = parent::onUpdate($currentTick);
-		if (!$this->hadCollision and $this->isCritical) {
-			$this->level->addParticle(new CriticalParticle($this->add(
-				$this->width / 2 + mt_rand(-100, 100) / 500,
-				$this->height / 2 + mt_rand(-100, 100) / 500,
-				$this->width / 2 + mt_rand(-100, 100) / 500
-			)));
-		} else if ($this->onGround) {
-			$this->isCritical = false;
+
+		if ($this->onGround || $this->hadCollision) {
+		    $this->setCritical(false);
 		}
+
 		if ($this->age > 1200) {
 			$this->kill();
 			$hasUpdate = true;
@@ -68,6 +66,15 @@ class Arrow extends Projectile {
 		}
 		return $hasUpdate;
 	}
+
+	public function isCritical(){
+	    return $this->getDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL);
+    }
+
+    public function setCritical($critical = true){
+        $this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_CRITICAL, $critical);
+    }
+
 	public function spawnTo(Player $player) {
 		if (!isset($this->hasSpawned[$player->getId()]) && isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])) {
 			$this->hasSpawned[$player->getId()] = $player;
@@ -80,6 +87,7 @@ class Arrow extends Projectile {
 			$pk->speedX = $this->motionX;
 			$pk->speedY = $this->motionY;
 			$pk->speedZ = $this->motionZ;
+            $pk->metadata = $this->dataProperties;
 			$player->dataPacket($pk);
 		}
 	}
@@ -88,15 +96,10 @@ class Arrow extends Projectile {
 		$bb = clone parent::getBoundingBox();
 		return $bb;
 	}
-	
+		
 	public function move($dx, $dy, $dz) {
 		$this->blocksAround = null;
 		if ($dx == 0 && $dz == 0 && $dy == 0) {
-			return true;
-		}
-		if ($this->keepMovement) {
-			$this->boundingBox->offset($dx, $dy, $dz);
-			$this->setPosition(new Vector3(($this->boundingBox->minX + $this->boundingBox->maxX) / 2, $this->boundingBox->minY, ($this->boundingBox->minZ + $this->boundingBox->maxZ) / 2));
 			return true;
 		}
 		$pos = new Vector3($this->x + $dx, $this->y + $dy, $this->z + $dz);
@@ -116,4 +119,18 @@ class Arrow extends Projectile {
 		$this->updateFallState($dy, $this->onGround);
 		return true;
 	}
+
+	public function kill() {
+		if (!$this->dead) {
+			$bb = clone $this->boundingBox;
+			$collidedBlocks = $this->level->getCollisionBlocks($bb);
+			foreach ($collidedBlocks as $block) {
+				if ($block instanceof WoodenButton) {
+					$block->onActivate(Item::get(Item::AIR), null);
+				}
+			}
+		}
+		parent::kill();
+	}
+
 }

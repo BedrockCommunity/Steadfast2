@@ -41,8 +41,8 @@ class Session{
     const STATE_CONNECTING_2 = 2;
     const STATE_CONNECTED = 3;
 
-	const MAX_SPLIT_SIZE = 128;
-	const MAX_SPLIT_COUNT = 4;
+	const MAX_SPLIT_SIZE = 12800;
+	const MAX_SPLIT_COUNT = 400;
 
     public static $WINDOW_SIZE = 2048;
 
@@ -251,6 +251,8 @@ class Session{
 			} else {
 				$packet->buffer = $this->fakeZlib($packet->buffer);
 			}
+		} elseif (($flags & RakLib::FLAG_NEED_ZLIB_RAW) > 0) {
+			$packet->buffer = zlib_encode($packet->buffer, ZLIB_ENCODING_RAW, 7);
 		}
 		if ($this->isEncryptEnable()) {
 			$packet->buffer = "\xfe" . $this->getEncrypt($packet->buffer);
@@ -488,7 +490,10 @@ class Session{
                         if(isset($this->recoveryQueue[$seq])){
 							$pk = $this->recoveryQueue[$seq];
 							$pk->seqNumber = $this->sendSeqNumber++;
-                            $this->packetToSend[] = $pk;
+							$pk->sendTime = microtime(true);
+							$pk->encode();
+							$this->sendPacket($pk);
+							$this->recoveryQueue[$pk->seqNumber] = $pk;
 							unset($this->recoveryQueue[$seq]);
                         }
                     }

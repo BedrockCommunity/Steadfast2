@@ -47,6 +47,7 @@ class CraftingDataPacket extends PEPacket{
 	/** @var object[] */
 	public $entries = [];
 	public $cleanRecipes = false;
+	private static $recipeIndex = 1;
 
 	private static function writeEntry($entry, BinaryStream $stream, $playerProtocol){
 		if($entry instanceof ShapelessRecipe){
@@ -88,6 +89,9 @@ class CraftingDataPacket extends PEPacket{
 		}
 		if ($playerProtocol >= Info::PROTOCOL_361) {
 			$stream->putSignedVarInt(0); // priority
+			if ($playerProtocol >= Info::PROTOCOL_392) {
+				$stream->putVarInt(self::$recipeIndex++);
+			}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
@@ -123,6 +127,9 @@ class CraftingDataPacket extends PEPacket{
 		}
 		if ($playerProtocol >= Info::PROTOCOL_361) {
 			$stream->putSignedVarInt(0); // priority
+			if ($playerProtocol >= Info::PROTOCOL_392) {
+				$stream->putVarInt(self::$recipeIndex++);
+			}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;
@@ -193,20 +200,24 @@ class CraftingDataPacket extends PEPacket{
 		$this->reset($playerProtocol);
 		$this->putVarInt(count($this->entries));
 
-		$writer = new BinaryStream();
-		foreach($this->entries as $d){
-			$entryType = self::writeEntry($d, $writer, $playerProtocol);
-			if($entryType >= 0){
-				$this->putSignedVarInt($entryType);
-				$this->put($writer->getBuffer());
-			}else{
-				$this->putSignedVarInt(-1);
-			}
+            $writer = new BinaryStream();
+            self::$recipeIndex = 1;
+            foreach($this->entries as $d){
+                $entryType = self::writeEntry($d, $writer, $playerProtocol);
+                if($entryType >= 0){
+                    $this->putSignedVarInt($entryType);
+                    $this->put($writer->getBuffer());
+                }else{
+                    $this->putSignedVarInt(-1);
+                }
 
-			$writer->reset();
-		}
-
-		$this->putByte($this->cleanRecipes ? 1 : 0);
+                $writer->reset();
+            }
+            if($playerProtocol >= Info::PROTOCOL_385){
+                $this->putVarInt(0);
+                $this->putVarInt(0);
+            }
+            $this->putByte($this->cleanRecipes ? 1 : 0);
 	}
 
 }

@@ -145,14 +145,12 @@ class Explosion{
 
 		$explosionBB = new AxisAlignedBB($minX, $minY, $minZ, $maxX, $maxY, $maxZ);
 
-		if($this->what instanceof Entity){
-			$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
-			if($ev->isCancelled()){
-				return false;
-			}else{
-				$yield = $ev->getYield();
-				$this->affectedBlocks = $ev->getBlockList();
-			}
+		$this->level->getServer()->getPluginManager()->callEvent($ev = new EntityExplodeEvent($this->what, $this->source, $this->affectedBlocks, $yield));
+		if($ev->isCancelled()){
+			return false;
+		}else{
+			$yield = $ev->getYield();
+			$this->affectedBlocks = $ev->getBlockList();
 		}
 
 		$list = $this->level->getNearbyEntities($explosionBB, $this->what instanceof Entity ? $this->what : null);
@@ -204,7 +202,7 @@ class Explosion{
 		Server::broadcastPacket($this->level->getUsingChunk($source->x >> 4, $source->z >> 4), $pk);		
 		$this->level->addParticle(new HugeExplodeParticle(new Vector3($this->source->x,  $this->source->y, $this->source->z)));	
 		$pk1 = new LevelSoundEventPacket();
-		$pk1->eventId = 45;
+		$pk1->eventId = LevelSoundEventPacket::SOUND_EXPLODE;
 		$pk1->x = $this->source->x;
 		$pk1->y = $this->source->y;
 		$pk1->z = $this->source->z;

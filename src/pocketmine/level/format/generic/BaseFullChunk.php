@@ -154,8 +154,12 @@ abstract class BaseFullChunk implements FullChunk{
 						$this->setChanged();
 						continue; //Fixes tiles allocated in wrong chunks.
 					}
-
-					if(Tile::createTile($nbt["id"], $this, $nbt) === null){
+					$tileName = $nbt["id"];
+					// this part for pc maps
+//					if (substr($nbt["id"], 0, 10) == 'minecraft:') {
+//						$tileName = str_replace("_", "", ucwords(substr($tileName, 10), "_"));
+//					}
+					if(Tile::createTile($tileName, $this, $nbt) === null){
 						$this->setChanged();
 						continue;
 					}
@@ -308,9 +312,6 @@ abstract class BaseFullChunk implements FullChunk{
 
 	public function unload($save = true, $safe = true){
 		$level = $this->getProvider();
-		if(!$this->allowUnload){
-			return false;
-		}
 		if($level === null){
 			return true;
 		}
@@ -387,32 +388,6 @@ abstract class BaseFullChunk implements FullChunk{
 				$this->setHeightMap($x, $z, $this->getHighestBlockAt($x, $z, false));
 			}
 		}
-	}
-	
-	public function populateSkyLight(){
-		for($z = 0; $z < 16; ++$z){
-			for($x = 0; $x < 16; ++$x){
-				$top = $this->getHeightMap($x, $z);
-				$provider = $this->provider;
-				for($y = $provider::getMaxY() - 1; $y > $top; --$y){
-					$this->setBlockSkyLight($x, $y, $z, 15);
-				}
-
-				for($y = $top; $y >= 0; --$y){
-					if(Block::$solid[$this->getBlockId($x, $y, $z)]){
-						break;
-					}
-
-					$this->setBlockSkyLight($x, $y, $z, 15);
-				}
-
-				$this->setHeightMap($x, $z, $this->getHighestBlockAt($x, $z, false));
-			}
-		}
-	}
-	
-	public function setLightPopulated($value = 1){
-
 	}
 	
 	public function setBlockIdArray($arr){

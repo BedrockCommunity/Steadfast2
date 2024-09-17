@@ -42,10 +42,13 @@ class SetEntityLinkPacket extends PEPacket{
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->from);
-		$this->putVarInt($this->to);
+		$this->putEntityUniqueId($this->from);
+		$this->putEntityUniqueId($this->to);
 		$this->putByte($this->type);
-		$this->putByte(0);
+		$this->putByte(0); //immediate 
+		if ($playerProtocol >= Info::PROTOCOL_406) {
+			$this->putByte(0);//whether the link was changes by the rider
+		}	
 	}
 
 }

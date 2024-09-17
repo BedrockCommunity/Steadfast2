@@ -45,6 +45,7 @@ class EntityEventPacket extends PEPacket{
 	const AMBIENT_SOUND = 17;
 	const RESPAWN = 18;
 	const ENCHANT = 34;
+	const ARROW_SHAKE = 39;
 	const FEED = 57;
 
 	//TODO add new events
@@ -55,14 +56,14 @@ class EntityEventPacket extends PEPacket{
 
 	public function decode($playerProtocol){
 		$this->getHeader($playerProtocol);
-		$this->eid = $this->getVarInt();
+		$this->eid = $this->getEntityRuntimeId();
 		$this->event = $this->getByte();
 		$this->theThing = $this->getSignedVarInt();
 	}
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
-		$this->putVarInt($this->eid);
+		$this->putEntityRuntimeId($this->eid);
 		$this->putByte($this->event);
 		/** @todo do it right */
 		$this->putSignedVarInt(0); // event data

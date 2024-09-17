@@ -6,7 +6,6 @@ use pocketmine\network\protocol\Info;
 
 abstract class MultiversionEnums {
 
-	const GROUP_1 = 1;
 	const GROUP_2 = 2;
 	const GROUP_3 = 3;
 
@@ -418,116 +417,6 @@ abstract class MultiversionEnums {
 			163 => 'SOUND_DEFAULT',
 			164 => 'SOUND_UNDEFINED'
 		],
-		self::GROUP_1 => [
-			0 => 'SOUND_USE_ITEM_ON',
-			1 => 'SOUND_HIT',
-			2 => 'SOUND_STEP',
-			3 => 'SOUND_JUMP',
-			4 => 'SOUND_BREAK',
-			5 => 'SOUND_PLACE',
-			6 => 'SOUND_HEAVY_STEP',
-			7 => 'SOUND_GALLOP',
-			8 => 'SOUND_FALL',
-			9 => 'SOUND_AMBIENT',
-			10 => 'SOUND_AMBIENT_BABY',
-			11 => 'SOUND_AMBIENT_IN_WATER',
-			12 => 'SOUND_BREATHE',
-			13 => 'SOUND_DEATH',
-			14 => 'SOUND_DEATH_IN_WATER',
-			15 => 'SOUND_DEATH_TO_ZOMBIE',
-			16 => 'SOUND_HURT',
-			17 => 'SOUND_HURT_IN_WATER',
-			18 => 'SOUND_MAD',
-			19 => 'SOUND_BOOST',
-			20 => 'SOUND_BOW',
-			21 => 'SOUND_SQUISH_BIG',
-			22 => 'SOUND_SQUISH_SMALL',
-			23 => 'SOUND_FALL_BIG',
-			24 => 'SOUND_FALL_SMALL',
-			25 => 'SOUND_SPLASH',
-			26 => 'SOUND_FIZZ',
-			27 => 'SOUND_FLAP',
-			28 => 'SOUND_SWIM',
-			29 => 'SOUND_DRINK',
-			30 => 'SOUND_EAT',
-			31 => 'SOUND_TAKE_OFF',
-			32 => 'SOUND_SHAKE',
-			33 => 'SOUND_PLOP',
-			34 => 'SOUND_LAND',
-			35 => 'SOUND_SADDLE',
-			36 => 'SOUND_ARMOR',
-			37 => 'SOUND_ADD_CHEST',
-			38 => 'SOUND_THROW',
-			39 => 'SOUND_ATTACK',
-			40 => 'SOUND_ATTACK_NO_DAMAGE',
-			41 => 'SOUND_WARN',
-			42 => 'SOUND_SHEAR',
-			43 => 'SOUND_MILK',
-			44 => 'SOUND_THUNDER',
-			45 => 'SOUND_EXPLODE',
-			46 => 'SOUND_FIRE',
-			47 => 'SOUND_IGNITE',
-			48 => 'SOUND_FUSE',
-			49 => 'SOUND_STARE',
-			50 => 'SOUND_SPAWN',
-			51 => 'SOUND_SHOOT',
-			52 => 'SOUND_BREAK_BLOCK',
-			53 => 'SOUND_REMEDY',
-			54 => 'SOUND_UNFECT',
-			55 => 'SOUND_LEVEL_UP',
-			56 => 'SOUND_BOW_HIT',
-			57 => 'SOUND_BULLET_HIT',
-			58 => 'SOUND_EXTINGUISH_FIRE',
-			59 => 'SOUND_ITEM_FIZZ',
-			60 => 'SOUND_CHEST_OPEN',
-			61 => 'SOUND_CHEST_CLOSED',
-			62 => 'SOUND_SHULKER_BOX_OPEN',
-			63 => 'SOUND_SHULKERBOXCLOSED',
-			64 => 'SOUND_POWER_ON',
-			65 => 'SOUND_POWER_OFF',
-			66 => 'SOUND_ATTACH',
-			67 => 'SOUND_DETACH',
-			68 => 'SOUND_DENY',
-			69 => 'SOUND_TRIPOD',
-			70 => 'SOUND_POP',
-			71 => 'SOUND_DROP_SLOT',
-			72 => 'SOUND_NOTE',
-			73 => 'SOUND_THORNS',
-			74 => 'SOUND_PISTON_IN',
-			75 => 'SOUND_PISTON_OUT',
-			76 => 'SOUND_PORTAL',
-			77 => 'SOUND_WATER',
-			78 => 'SOUND_LAVA_POP',
-			79 => 'SOUND_LAVA',
-			80 => 'SOUND_BURP',
-			81 => 'SOUND_BUCKET_FILL_WATER',
-			82 => 'SOUND_BUCKET_FILL_LAVA',
-			83 => 'SOUND_BUCKET_EMPTY_WATER',
-			84 => 'SOUND_BUCKET_EMPTY_LAVA',
-			85 => 'SOUND_GUARDIAN_FLOP',
-			86 => 'SOUND_GUARDIAN_CURSE',
-			87 => 'SOUND_MOB_WARNING',
-			88 => 'SOUND_MOB_WARNING_BABY',
-			89 => 'SOUND_TELEPORT',
-			90 => 'SOUND_SHULKER_OPEN',
-			91 => 'SOUND_SHULKER_CLOSE',
-			92 => 'SOUND_HAGGLE',
-			93 => 'SOUND_HAGGLE_YES',
-			94 => 'SOUND_HAGGLE_NO',
-			95 => 'SOUND_HAGGLE_IDLE',
-			96 => 'SOUND_CHORUS_GROW',
-			97 => 'SOUND_CHORUS_DEATH',
-			98 => 'SOUND_GLASS',
-			99 => 'SOUND_CAST_SPELL',
-			100 => 'SOUND_PREPARE_ATTACK_SPELL',
-			101 => 'SOUND_PREPARE_SUMMON',
-			102 => 'SOUND_PREPARE_WOLOLO',
-			103 => 'SOUND_FANG',
-			104 => 'SOUND_CHARGE',
-			105 => 'SOUND_TAKE_PICTURE',
-			106 => 'SOUND_DEFAULT',
-			107 => 'SOUND_UNDEFINED'
-		]
 	];
 
 	public static function getLevelSoundEventName($playerProtocol, $eventId) {
@@ -550,34 +439,9 @@ abstract class MultiversionEnums {
 
 	private static function getSoundKeyByProtocol($protocol) {
 		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
 			case Info::PROTOCOL_120:
 			case Info::PROTOCOL_200:
 				return self::GROUP_2;
-			case Info::PROTOCOL_361:
-			case Info::PROTOCOL_360:
-			case Info::PROTOCOL_354:
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_340:
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_290:
-			case Info::PROTOCOL_282:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_220:
-				return self::GROUP_3;
 			default:
 				return self::GROUP_3;
 		}
@@ -594,16 +458,6 @@ abstract class MultiversionEnums {
 			6 => 'TYPE_SYSTEM',
 			7 => 'TYPE_WHISPER',
 			8 => 'TYPE_ANNOUNCEMENT',
-		],
-		self::GROUP_1 => [
-			0 => 'TYPE_RAW',
-			1 => 'TYPE_CHAT',
-			2 => 'TYPE_TRANSLATION',
-			3 => 'TYPE_POPUP',
-			4 => 'TYPE_TIP',
-			5 => 'TYPE_SYSTEM',
-			6 => 'TYPE_WHISPER',
-			7 => 'TYPE_ANNOUNCEMENT',
 		]
 	];
 
@@ -626,37 +480,7 @@ abstract class MultiversionEnums {
 	}
 
 	private static function getTextKeyByProtocol($protocol) {
-		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
-			case Info::PROTOCOL_361:
-			case Info::PROTOCOL_360:
-			case Info::PROTOCOL_354:
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_340:
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_290:
-			case Info::PROTOCOL_282:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_220:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_120:
-				return self::GROUP_2;
-			default:
-				return self::GROUP_2;
-		}
+		return self::GROUP_2;
 	}
 
 	private static $playerActionType = [
@@ -675,8 +499,8 @@ abstract class MultiversionEnums {
 			10 => 'STOP_STRINTING',
 			11 => 'START_SNEAKING',
 			12 => 'STOP_SNEAKING',
-			13 => 'CHANGE_DEMENSION',
-			14 => 'CHANGE_DEMENSION_ACK',
+			13 => 'CHANGE_DIMENSION', //TODO: Changing?
+			14 => 'CHANGE_DIMENSION_ACK',
 			15 => 'START_GLIDING',
 			16 => 'STOP_GLIDING',
 			17 => 'DENY_DESTROY_BLOCK',
@@ -686,30 +510,9 @@ abstract class MultiversionEnums {
 			21 => 'START_SWIMMING',
 			22 => 'STOP_SWIMMING',
 			23 => 'START_SPIN_ATTACK',
-			24 => 'STOP_SPIN_ATTACK'
+			24 => 'STOP_SPIN_ATTACK',
+			25 => 'INTERACT_WITH_BLOCK',
 		],
-		self::GROUP_1 => [
-			-1 => 'UNKNOWN',
-			0 => 'START_DESTROY_BLOCK',
-			1 => 'ABORT_DESTROY_BLOCK',
-			2 => 'STOP_DESTROY_BLOCK',
-			3 => 'GET_UPDATED_BLOCK',
-			4 => 'DROP_ITEM',
-			5 => 'RELEASE_USE_ITEM',
-			6 => 'STOP_SLEEPENG',
-			7 => 'RESPAWN',
-			8 => 'START_JUMP',
-			9 => 'START_SPRINTING',
-			10 => 'STOP_STRINTING',
-			11 => 'START_SNEAKING',
-			12 => 'STOP_SNEAKING',
-			13 => 'CHANGE_DEMENSION',
-			14 => 'CHANGE_DEMENSION_ACK',
-			15 => 'START_GLIDING',
-			16 => 'STOP_GLIDING',
-			17 => 'DENY_DESTROY_BLOCK',
-			18 => 'CRACK_BLOCK',
-		]
 	];
 
 	public static function getPlayerAction($playerProtocol, $actionId) {
@@ -731,37 +534,7 @@ abstract class MultiversionEnums {
 	}
 
 	private static function getActionKeyByProtocol($protocol) {
-		switch ($protocol) {
-			case Info::PROTOCOL_110:
-				return self::GROUP_1;
-			case Info::PROTOCOL_361:
-			case Info::PROTOCOL_360:
-			case Info::PROTOCOL_354:
-			case Info::PROTOCOL_351:
-			case Info::PROTOCOL_350:
-			case Info::PROTOCOL_342:
-			case Info::PROTOCOL_340:
-			case Info::PROTOCOL_332:
-			case Info::PROTOCOL_331:
-			case Info::PROTOCOL_330:
-			case Info::PROTOCOL_311:
-			case Info::PROTOCOL_310:
-			case Info::PROTOCOL_290:
-			case Info::PROTOCOL_282:
-			case Info::PROTOCOL_280:
-			case Info::PROTOCOL_274:
-			case Info::PROTOCOL_273:
-			case Info::PROTOCOL_271:
-			case Info::PROTOCOL_260:
-			case Info::PROTOCOL_240:
-			case Info::PROTOCOL_221:
-			case Info::PROTOCOL_220:
-			case Info::PROTOCOL_200:
-			case Info::PROTOCOL_120:
-				return self::GROUP_2;
-			default:
-				return self::GROUP_2;
-		}
+		return self::GROUP_2;
 	}
 
 	private static $commandArgTypes = [
@@ -812,4 +585,117 @@ abstract class MultiversionEnums {
 		return 0;
 	}
 	
+	
+	public static $particleIds = [
+		Info::PROTOCOL_360 => [
+			"TYPE_BUBBLE" => -1,
+			"TYPE_CRITICAL" => -1,
+			"TYPE_SMOKE" => 5,
+			"TYPE_EXPLODE" => -1,
+			"TYPE_WHITE_SMOKE" => -1,
+			"TYPE_FLAME" => 8,
+			"TYPE_LAVA" => -1,
+			"TYPE_LARGE_SMOKE" => 10,
+			"TYPE_REDSTONE" => -1,
+			"TYPE_ITEM_BREAK" => -1,
+			"TYPE_SNOWBALL_POOF" => -1,
+			"TYPE_LARGE_EXPLODE" => -1,
+			"TYPE_HUGE_EXPLODE" => -1,
+			"TYPE_MOB_FLAME" => -1,
+			"TYPE_HEART" => 18,
+			"TYPE_TERRAIN" => 19,
+			"TYPE_TOWN_AURA" => -1,
+			"TYPE_PORTAL" => -1,
+			"TYPE_WATER_SPLASH" => -1,
+			"TYPE_WATER_WAKE" => -1,
+			"TYPE_DRIP_WATER" => 26,
+			"TYPE_DRIP_LAVA" => 27,
+			"TYPE_DUST" => -1,
+			"TYPE_MOB_SPELL" => -1,
+			"TYPE_MOB_SPELL_AMBIENT" => 30,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 31,
+			"TYPE_INK" => -1,
+			"TYPE_SLIME" => 33,
+			"TYPE_RAIN_SPLASH" => 34,
+			"TYPE_VILLAGER_ANGRY" => 35,
+			"TYPE_VILLAGER_HAPPY" => 36,
+			"TYPE_ENCHANTMENT_TABLE" => -1,
+			"TYPE_NOTE" => -1,
+			"TYPE_WITCH_MAGIC" => 40,
+			"TYPE_ICE_CRYSTAL" => 43,				
+		],
+		Info::PROTOCOL_120 => [
+			"TYPE_BUBBLE" => 1,
+			"TYPE_CRITICAL" => 2,
+			"TYPE_SMOKE" => 4,
+			"TYPE_EXPLODE" => 5,
+			"TYPE_WHITE_SMOKE" => 6,
+			"TYPE_FLAME" => 7,
+			"TYPE_LAVA" => 8,
+			"TYPE_LARGE_SMOKE" => 9,
+			"TYPE_REDSTONE" => 10,
+			"TYPE_ITEM_BREAK" => 12,
+			"TYPE_SNOWBALL_POOF" => 13,
+			"TYPE_LARGE_EXPLODE" => 14,
+			"TYPE_HUGE_EXPLODE" => 15,
+			"TYPE_MOB_FLAME" => 16,
+			"TYPE_HEART" => 17,
+			"TYPE_TERRAIN" => 18,
+			"TYPE_TOWN_AURA" => 19,
+			"TYPE_PORTAL" => 20,
+			"TYPE_WATER_SPLASH" => 21,
+			"TYPE_WATER_WAKE" => 22,
+			"TYPE_DRIP_WATER" => 23,
+			"TYPE_DRIP_LAVA" => 24,
+			"TYPE_DUST" => 25,
+			"TYPE_MOB_SPELL" => 26,
+			"TYPE_MOB_SPELL_AMBIENT" => 27,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 28,
+			"TYPE_INK" => 29,
+			"TYPE_SLIME" => 30,
+			"TYPE_RAIN_SPLASH" => 31,
+			"TYPE_VILLAGER_ANGRY" => 32,
+			"TYPE_VILLAGER_HAPPY" => 33,
+			"TYPE_ENCHANTMENT_TABLE" => 34,
+			"TYPE_NOTE" => 36,
+			"TYPE_WITCH_MAGIC" => 37,
+			"TYPE_ICE_CRYSTAL" => 40,			
+		]
+	];
+	
+	private static $packTypes = [
+		Info::PROTOCOL_120 => [
+			"TYPE_INVALID" => 0,
+			"TYPE_RESOURCE" => 1,
+			"TYPE_BEHAVIOR" => 2,
+			"TYPE_WORLD_TEMPLATE" => 3,
+			"TYPE_ADDON" => 4,
+			"TYPE_SKINS" => 5,
+			"TYPE_CACHED" => 6,
+			"TYPE_COPY_PROTECTED" => 7,
+			"TYPE_COUNT" => 8,
+		],
+		Info::PROTOCOL_370 => [
+			"TYPE_INVALID" => 0,
+			"TYPE_ADDON" => 1,
+			"TYPE_CACHED" => 2,
+			"TYPE_COPY_PROTECTED" => 3,
+			"TYPE_BEHAVIOR" => 4,
+			"TYPE_PERSONA_PIECE" => 5,
+			"TYPE_RESOURCE" => 6,
+			"TYPE_SKINS" => 7,
+			"TYPE_WORLD_TEMPLATE" => 8,
+			"TYPE_COUNT" => 9,
+		]
+	];
+	
+	public static function getPackTypeId($playerProtocol, $typeName) {
+		if ($playerProtocol >= Info::PROTOCOL_370) {
+			$key = Info::PROTOCOL_370;
+		} else {
+			$key = Info::PROTOCOL_120;
+		}
+		return self::$packTypes[$key][$typeName] ?? 0;
+	}
+
 }

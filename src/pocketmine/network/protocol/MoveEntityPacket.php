@@ -32,21 +32,42 @@ class MoveEntityPacket extends PEPacket{
 	// eid, x, y, z, yaw, pitch
 	/** @var array[] */
 	public $entities = [];
-
+	public $eid;
+	public $x;
+	public $y;
+	public $z;
+	public $pitch;
+	public $yaw;
+	public $headYaw;
+	
 	public function clean(){
 		$this->entities = [];
 		return parent::clean();
 	}
 
 	public function decode($playerProtocol){
-
+		$this->getHeader($playerProtocol);
+		$this->eid = $this->getVarInt();
+		if ($playerProtocol >= Info::PROTOCOL_273) {
+			if ($playerProtocol >= Info::PROTOCOL_274) {
+				$this->getByte();
+			} else {
+				$this->getLShort();
+			}
+		} 		
+		$this->x = $this->getLFloat();
+		$this->y = $this->getLFloat();
+		$this->z = $this->getLFloat();
+		$this->pitch = $this->getByte() * 1.40625;
+		$this->headYaw = $this->getByte() * 1.40625;
+		$this->yaw = $this->getByte() * 1.40625;
 	}
 
 	public function encode($playerProtocol){
 		$this->reset($playerProtocol);
 		$data = array_shift($this->entities);
 		if ($playerProtocol >= Info::PROTOCOL_273) {
-			$this->putVarInt($data[0]); //eid
+			$this->putEntityRuntimeId($data[0]); //eid
 			$flags = 0;
 			$flags |= 1 << 7;// is on ground?
 //			$flags |= 0 << 6;// has teleported?
@@ -62,7 +83,7 @@ class MoveEntityPacket extends PEPacket{
 			$this->putByte($data[4] * 0.71111); //yaw
 			$this->putByte($data[5] * 0.71111); //headYaw	
 		} else {
-			$this->putVarInt($data[0]); //eid
+			$this->putEntityRuntimeId($data[0]); //eid
 			$this->putLFloat($data[1]); //x
 			$this->putLFloat($data[2]); //y
 			$this->putLFloat($data[3]); //z

@@ -3,9 +3,9 @@
 namespace pocketmine\network\protocol\v120;
 
 use pocketmine\inventory\transactions\SimpleTransactionData;
-use pocketmine\network\protocol\ContainerSetContentPacket;
 use pocketmine\network\protocol\Info120;
 use pocketmine\network\protocol\PEPacket;
+use pocketmine\network\protocol\Info;
 
 class InventoryTransactionPacket extends PEPacket {
 
@@ -48,9 +48,25 @@ class InventoryTransactionPacket extends PEPacket {
 	public $clickPosition;
 	public $entityId;
 
-	public function decode($playerProtocol) {
+	public function decode($playerProtocol) {	
 		$this->getHeader($playerProtocol);
+		if ($playerProtocol >= Info::PROTOCOL_392) {
+			$unknown = $this->getVarInt();
+			if ($unknown != 0) {
+				$count = $this->getVarInt();
+				for ($i = 0; $i < $count; $i++) {
+					$invId = $this->getVarInt();
+					$slotCount = $this->getVarInt();
+					for ($j = 0; $j < $slotCount; $j++) {
+						$slot = $this->getVarInt();
+					}
+				}
+			}
+		}	
 		$this->transactionType = $this->getVarInt();
+		if ($playerProtocol >= Info::PROTOCOL_393) {
+			$this->getByte();
+		}		
 		$this->transactions = $this->getTransactions($playerProtocol);
 		$this->getComplexTransactions($playerProtocol);
 	}
@@ -76,7 +92,7 @@ class InventoryTransactionPacket extends PEPacket {
 					$tr->flags = $this->getVarInt(); // flags NoFlag = 0 WorldInteraction_Random = 1
 					break;
 				case self::INV_SOURCE_TYPE_CREATIVE:
-					$tr->inventoryId = ContainerSetContentPacket::SPECIAL_CREATIVE;
+					$tr->inventoryId = Protocol120::CONTAINER_ID_CREATIVE;
 					break;
 				case self::INV_SOURCE_TYPE_CRAFT:
 				case self::INV_SOURCE_TYPE_CRAFT_SLOT:
@@ -85,7 +101,10 @@ class InventoryTransactionPacket extends PEPacket {
 			}
 			$tr->slot = $this->getVarInt();
 			$tr->oldItem = $this->getSlot($playerProtocol);
-			$tr->newItem = $this->getSlot($playerProtocol);			
+			$tr->newItem = $this->getSlot($playerProtocol);	
+			if ($playerProtocol == Info::PROTOCOL_392) {
+				$this->getByte();
+			}
 			$transactions[] = $tr;
 		}
 		return $transactions;

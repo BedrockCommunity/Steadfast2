@@ -41,10 +41,14 @@ use pocketmine\entity\Item as DroppedItem;
 use pocketmine\entity\Painting;
 use pocketmine\entity\PrimedTNT;
 use pocketmine\entity\projectile\BottleOEnchanting;
+use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\entity\Snowball;
 use pocketmine\entity\Egg;
 use pocketmine\entity\Squid;
 use pocketmine\entity\Villager;
+use pocketmine\entity\Minecart;
+use pocketmine\entity\Boat;
+use pocketmine\entity\FishingHook;
 use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
@@ -101,13 +105,17 @@ use pocketmine\scheduler\ServerScheduler;
 use pocketmine\tile\Bed;
 use pocketmine\tile\Cauldron;
 use pocketmine\tile\Chest;
+use pocketmine\tile\Dispenser;
+use pocketmine\tile\Dropper;
+use pocketmine\tile\Hopper;
 use pocketmine\tile\EnchantTable;
 use pocketmine\tile\EnderChest;
+use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Furnace;
+use pocketmine\tile\PistonArm;
 use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Skull;
-use pocketmine\tile\FlowerPot;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Cache;
@@ -149,6 +157,7 @@ use pocketmine\utils\MetadataConvertor;
 use pocketmine\event\server\SendRecipiesList;
 use pocketmine\network\protocol\PEPacket;
 use pocketmine\tile\Beacon;
+use pocketmine\tile\Banner;
 
 /**
  * The class that manages everything
@@ -277,7 +286,6 @@ class Server{
 	private $useMonster ;
 	private $monsterLimit;
 		
-
 	public $packetMaker = null;
 	
 	private $jsonCommands = [];
@@ -1466,7 +1474,7 @@ class Server{
 	 * @param string          $dataPath
 	 * @param string          $pluginPath
 	 */
-	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){	
+	public function __construct(\ClassLoader $autoloader, \ThreadedLogger $logger, $filePath, $dataPath, $pluginPath){
 		self::$instance = $this;
 		self::$serverId =  mt_rand(0, PHP_INT_MAX);
 
@@ -1885,6 +1893,7 @@ class Server{
 		foreach ($packets as $pk) {
 			if ($playersCount < 2) {
 				foreach ($players as $p) {
+					$pk->setDeviceId($p->getDeviceOS());
 					$p->dataPacket($pk);
 				}
 			} else {
@@ -2284,9 +2293,10 @@ class Server{
 		foreach ($players as $p){
 			$protocol = $p->getPlayerProtocol();
 			if (!isset($readyPackets[$protocol])) {
+				$pk->setDeviceId($p->getDeviceOS());
 				$pk->encode($protocol, $p->getSubClientId());
 				$batch = new BatchPacket();
-				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), ZLIB_ENCODING_DEFLATE, 7);
+				$batch->payload = zlib_encode(Binary::writeVarInt(strlen($pk->getBuffer())) . $pk->getBuffer(), Player::getCompressAlg($protocol), 7);
 				$readyPackets[$protocol] = $batch;
 			}
 			$p->dataPacket($readyPackets[$protocol]);
@@ -2312,10 +2322,10 @@ class Server{
 			foreach($this->getCraftingManager()->getRecipes() as $recipe){
 				$recipies[] = $recipe;
 			}
-			foreach($this->getCraftingManager()->getFurnaceRecipes() as $recipe){
+			
+			foreach ($this->getCraftingManager()->getFurnaceRecipes() as $recipe) {
 				$recipies[] = $recipe;
 			}
-			
 			$this->getPluginManager()->callEvent($ev = new SendRecipiesList($recipies));
 			
 			foreach($ev->getRecipies() as $recipe){
@@ -2328,11 +2338,11 @@ class Server{
 				}
 			}
 			
-			$pk->encode($p->getPlayerProtocol(), $p->getSubClientId());
+			$pk->encode($p->getPlayerProtocol());
 			$bpk = new BatchPacket();
 			$buffer = $pk->getBuffer();
-			$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($buffer)) . $buffer, ZLIB_ENCODING_DEFLATE, 7);
-			$bpk->encode($p->getPlayerProtocol());
+        	$bpk->payload = zlib_encode(Binary::writeVarInt(strlen($buffer)) . $buffer, Player::getCompressAlg($p->getPlayerProtocol()), 7);
+        	$bpk->encode($p->getPlayerProtocol());
 			$this->craftList[$p->getPlayerProtocol()] = $bpk->getBuffer();
 		}
 		$p->getInterface()->putReadyPacket($p, $this->craftList[$p->getPlayerProtocol()]);
@@ -2506,7 +2516,11 @@ class Server{
 	}
 
 	private function registerEntities(){
+		Entity::registerEntity(Minecart::class);
+		Entity::registerEntity(Boat::class);
+		Entity::registerEntity(FishingHook::class);
 		Entity::registerEntity(Arrow::class);
+		Entity::registerEntity(SplashPotion::class);
 		Entity::registerEntity(DroppedItem::class);
 		Entity::registerEntity(FallingSand::class);
 		Entity::registerEntity(PrimedTNT::class);
@@ -2554,8 +2568,13 @@ class Server{
         Tile::registerTile(EnderChest::class);
 		Tile::registerTile(Bed::class);
 		Tile::registerTile(Cauldron::class);
+		Tile::registerTile(Dispenser::class);
+		Tile::registerTile(PistonArm::class);
 		Tile::registerTile(ItemFrame::class);
+		Tile::registerTile(Dropper::class);
+		Tile::registerTile(Hopper::class);
 		Tile::registerTile(Beacon::class);
+		Tile::registerTile(Banner::class);
 	}
 
 	public function shufflePlayers(){
@@ -2591,5 +2610,9 @@ class Server{
 	
 	public function getServerToken() {	
 		return $this->serverToken;
+	}
+	
+	public function addLevel($level) {
+		$this->levels[$level->getId()] = $level;
 	}
 }

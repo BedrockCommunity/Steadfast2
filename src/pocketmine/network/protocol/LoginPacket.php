@@ -23,7 +23,6 @@ namespace pocketmine\network\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\protocol\Info;
 use pocketmine\Server;
 use pocketmine\utils\Binary;
 use pocketmine\utils\JWT;
@@ -63,6 +62,7 @@ class LoginPacket extends PEPacket {
 	public $premiunSkin = "";
 	public $identityPublicKey = "";
 	public $platformChatId = "";
+	public $additionalSkinData = [];
 
 	private function getFromString(&$body, $len) {
 		$res = substr($body, 0, $len);
@@ -82,9 +82,6 @@ class LoginPacket extends PEPacket {
 		if (!in_array($this->protocol1, $acceptedProtocols)) {
 			$this->isValidProtocol = false;
 			return;
-		}
-		if ($this->protocol1 < Info::PROTOCOL_120) {
-			$this->getByte();
 		}
 		$data = $this->getString();
 		if (ord($data{0}) != 120 || (($decodedData = @zlib_decode($data)) === false)) {
@@ -164,7 +161,6 @@ class LoginPacket extends PEPacket {
 		} else {
 			$this->playerData = self::load($this->playerData);
 		}
-
 		$this->username = $this->chains['data'][$dataIndex]['extraData']['displayName'];
 		$this->clientId = $this->chains['data'][$dataIndex]['extraData']['identity'];
 		$this->clientUUID = UUID::fromString($this->chains['data'][$dataIndex]['extraData']['identity']);
@@ -181,6 +177,11 @@ class LoginPacket extends PEPacket {
 		}
 		if (isset($this->playerData['SkinGeometry'])) {
 			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometry']);
+		} elseif (isset($this->playerData['SkinGeometryData'])) {
+			$this->skinGeometryData = base64_decode($this->playerData['SkinGeometryData']);
+			if (strpos($this->skinGeometryData, 'null') === 0) {
+				$this->skinGeometryData = '';
+			}
 		}
 		$this->clientSecret = $this->playerData['ClientRandomId'];
 		if (isset($this->playerData['DeviceOS'])) {
@@ -205,7 +206,38 @@ class LoginPacket extends PEPacket {
 			$this->platformChatId = $this->playerData["PlatformOnlineId"];
 		}
 		$this->originalProtocol = $this->protocol1;
-		$this->protocol1 = self::convertProtocol($this->protocol1);
+		$this->protocol1 = self::convertProtocol($this->protocol1);		
+		$additionalSkinDataList = [
+			'PlayFabId','AnimatedImageData', 'CapeId', 'CapeImageHeight', 'CapeImageWidth', 'CapeOnClassicSkin', 'PersonaSkin', 'PremiumSkin', 'SkinAnimationData', 'SkinImageHeight', 'SkinImageWidth', 'SkinResourcePatch'	
+		];
+		$additionalSkinData = [];
+		foreach ($additionalSkinDataList as $propertyName) {
+			if (isset($this->playerData[$propertyName])) {
+				$additionalSkinData[$propertyName] = $this->playerData[$propertyName];
+			}
+		}
+		if (isset($additionalSkinData['AnimatedImageData'])) {
+			foreach ($additionalSkinData['AnimatedImageData'] as &$animation) {
+				$animation['Image'] = base64_decode($animation['Image']);
+			}
+		}
+		if (isset($additionalSkinData['SkinResourcePatch'])) {
+			$additionalSkinData['SkinResourcePatch'] = base64_decode($additionalSkinData['SkinResourcePatch']);
+		}
+		if (isset($this->playerData["PersonaPieces"])) {
+			$additionalSkinData['PersonaPieces'] = $this->playerData["PersonaPieces"];
+		}
+		if (isset($this->playerData["ArmSize"])) {
+			$additionalSkinData['ArmSize'] = $this->playerData["ArmSize"];
+		}
+		if (isset($this->playerData["SkinColor"])) {
+			$additionalSkinData['SkinColor'] = $this->playerData["SkinColor"];
+		}
+		if (isset($this->playerData["PieceTintColors"])) {
+			$additionalSkinData['PieceTintColors'] = $this->playerData["PieceTintColors"];
+		}
+		$this->additionalSkinData = $additionalSkinData;
+		$this->checkSkinData($this->skin, $this->skinGeometryName, $this->skinGeometryData, $this->additionalSkinData);
 	}
 
 	public static function load($jwsTokenString) {

@@ -36,6 +36,7 @@ use pocketmine\nbt\NBT;
 use pocketmine\level\Level;
 use pocketmine\level\format\FullChunk;
 use pocketmine\block\Block;
+use pocketmine\block\Water;
 
 class Item extends Entity{
 	const NETWORK_ID = 64;
@@ -53,6 +54,14 @@ class Item extends Entity{
 	protected $drag = 0.02;
 
 	public $canCollide = false;
+	
+	protected static $transparentBlocks = [
+		Block::AIR, Block::WATER, Block::STILL_WATER, Block::LAVA, Block::STILL_LAVA,
+		Block::BROWN_MUSHROOM, Block::CARPET, Block::COBWEB, Block::DANDELION,
+		Block::FIRE, Block::RED_FLOWER, Block::FLOWER_POT_BLOCK, Block::RED_MUSHROOM,
+		Block::SAPLING, Block::SNOW_LAYER, Block::TALL_GRASS, Block::TORCH, Block::DOUBLE_PLANT,
+		Block::NETHER_WART_BLOCK, Block::WHEAT_BLOCK
+	];
 	
 	public function __construct(FullChunk $chunk, Compound $nbt) {
 		parent::__construct($chunk, $nbt);
@@ -126,6 +135,15 @@ class Item extends Entity{
 			} else {
 				$this->kill();
 				return true;
+			}
+		}
+		$blockId = $this->level->getBlockIdAt(floor($this->x), floor($this->y), floor($this->z));
+		if ($blockId == Block::WATER || $blockId == Block::STILL_WATER) {
+			$water = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z)));
+			if ($water instanceof Water) {
+				$flowVector = $water->getFlowVector();
+				$this->motionX = $flowVector->x * 0.1;
+				$this->motionZ = $flowVector->z * 0.1;
 			}
 		}
 		if (!$this->onGround || $this->motionX != 0 || $this->motionY != 0 || $this->motionZ != 0) {
@@ -259,17 +277,18 @@ class Item extends Entity{
 		$this->boundingBox->offset($dx, $dy, $dz);
 		$this->setComponents($this->x + $dx, $this->y + $dy, $this->z + $dz);
 		$this->checkChunks();
-		$blockY = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y - 0.5), floor($this->z)));
-		$this->onGround = !$blockY->isTransparent();
-		$blockX = $this->level->getBlock(new Vector3(floor($this->x + $this->motionX), floor($this->y), floor($this->z)));
-		if (!$blockX->isTransparent()) {
+		$this->onGround = !$this->isTransparentBlock(floor($this->x), floor($this->y - 0.5), floor($this->z));
+		if (!$this->isTransparentBlock(floor($this->x + $this->motionX), floor($this->y), floor($this->z))) {
 			$this->motionX = 0;
 		}
-		$blockZ = $this->level->getBlock(new Vector3(floor($this->x), floor($this->y), floor($this->z + $this->motionZ)));
-		if (!$blockZ->isTransparent()) {
+		if (!$this->isTransparentBlock(floor($this->x), floor($this->y), floor($this->z + $this->motionZ))) {
 			$this->motionZ = 0;
 		}
 		return true;
+	}
+
+	protected function isTransparentBlock($x, $y, $z) {
+		return in_array($this->level->getBlockIdAt($x, $y, $z), static::$transparentBlocks);
 	}
 
 }
